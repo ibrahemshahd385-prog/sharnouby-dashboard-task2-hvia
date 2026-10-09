@@ -18,6 +18,53 @@ CHANNEL_COLORS = {'Online': ORANGE, 'Retail': BLUE, 'Store': BLUE, 'Wholesale': 
 LOC = {'LOC001': 'Store', 'LOC002': 'Online', 'LOC003': 'Wholesale'}
 
 
+# ---------------------------------------------------------------- language (English / العربية)
+AR = 'العربية'
+
+
+def is_ar():
+    return st.session_state.get('lang', 'English') == AR
+
+
+def t(en, ar):
+    """Return the Arabic text when the user picked Arabic, else the English text."""
+    return ar if is_ar() else en
+
+
+CHANNEL_AR = {'Online': 'أونلاين', 'Retail': 'المتجر', 'Store': 'المتجر', 'Wholesale': 'الجملة'}
+SEGMENT_AR = {'Champions': 'الأبطال', 'Loyal': 'الأوفياء', 'New / Promising': 'جدد / واعدون',
+              "At Risk (Can't Lose)": 'معرّضون للخسارة (لا يمكن خسارتهم)', 'At Risk': 'معرّضون للخسارة',
+              'Need Attention': 'يحتاجون اهتمامًا', 'Lost': 'مفقودون'}
+
+
+def ch_name(x):
+    """Channel name for display: 'Retail' is shown as 'Store'."""
+    return CHANNEL_AR.get(x, x) if is_ar() else ('Store' if x == 'Retail' else x)
+
+
+def seg_name(x):
+    return SEGMENT_AR.get(x, x) if is_ar() else x
+
+
+def apply_language_style():
+    """Arabic: right-to-left text and an Arabic font. Charts and sliders keep their normal direction."""
+    if not is_ar():
+        return
+    st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap');
+h1, h2, h3, p, li, label, [data-testid="stMarkdownContainer"], [data-testid="stCaptionContainer"],
+[data-testid="stMetricLabel"], [data-testid="stMetricValue"], [data-testid="stWidgetLabel"], [data-testid="stSidebarNav"] a span {
+    font-family: 'IBM Plex Sans Arabic', 'Segoe UI', sans-serif;
+}
+h1, h2, h3, [data-testid="stMarkdownContainer"], [data-testid="stCaptionContainer"], [data-testid="stMetricLabel"],
+[data-testid="stWidgetLabel"], [data-testid="stAlert"], [data-testid="stExpander"] summary {
+    direction: rtl; text-align: right;
+}
+[data-testid="stSidebarNav"], [data-testid="stSidebarUserContent"] { direction: rtl; text-align: right; }
+</style>""", unsafe_allow_html=True)
+
+
 # ---------------------------------------------------------------- data
 def _find_data_file():
     here = Path(__file__).resolve().parent
@@ -45,11 +92,12 @@ def fiscal_year(dates):
 def style(fig, title, height=380, legend=False):
     """Same look as the notebook charts: title = the insight, light grid, no clutter."""
     fig.update_layout(
-        title=dict(text=f'<b>{title}</b>', x=0, xanchor='left', y=0.98, yanchor='top', yref='container',
+        title=dict(text=f'<b>{title}</b>', x=1 if is_ar() else 0, xanchor='right' if is_ar() else 'left',
+                   y=0.98, yanchor='top', yref='container',
                    font=dict(size=16, color='#0b0b0b')),
         height=height, margin=dict(l=70, r=20, t=88 if legend else 60, b=10),
         paper_bgcolor='white', plot_bgcolor='white',
-        font=dict(family='Inter, Segoe UI, sans-serif', size=13, color=INK),
+        font=dict(family='IBM Plex Sans Arabic, Inter, Segoe UI, sans-serif', size=13, color=INK),
         showlegend=legend,
         legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='left', x=0),
         hoverlabel=dict(bgcolor='white'),
@@ -78,7 +126,7 @@ def kpi(col, label, value, delta=None, inverse=False, help=None):
     """One KPI card. inverse=True means 'going up is bad' (shown in red)."""
     value = str(value)
     if value.endswith(' EGP'):          # keep the card short: "148.3M" and put the unit in the label
-        value, label = value[:-4], f'{label} (EGP)'
+        value, label = value[:-4], f"{label} ({t('EGP', 'جنيه')})"
     kw = dict(delta=delta, delta_color='inverse' if inverse else 'normal', help=help)
     try:
         col.metric(label, value, border=True, **kw)
@@ -87,9 +135,11 @@ def kpi(col, label, value, delta=None, inverse=False, help=None):
 
 
 def header(title, question, source):
+    apply_language_style()
     st.title(title)
-    st.markdown(f'**Business question:** {question}')
-    st.caption(f'Source notebooks: {source}')
+    st.markdown(f"**{t('Business question:', 'سؤال العمل:')}** {question}")
+    # \u2066 ... \u2069 keep the file names left-to-right inside Arabic text
+    st.caption(f"{t('Source notebooks:', 'النوت بوكس المصدر:')} \u2066{source}\u2069")
 
 
 def insight(text):
@@ -447,13 +497,15 @@ def profit_bridge(cap=0.30, winback=0.20, at_risk_rev=10.1, holding=0.20, excess
     b = bridge_inputs()
     cap_gain = ((b['wh_gross'] * (1 - np.minimum(b['wh_disc'], cap))).sum() - b['wh_net']) / 1e6
     rows = [
-        ['Cap wholesale discount', 'Discount cap', 'Sales', cap_gain],
-        ['Release excess stock', 'Excess stock', 'Supply chain', excess * holding],
-        ['Reduce cost of poor quality', 'Quality', 'Factory', b['copq_yr'] * copq_cut],
-        ['Win back at-risk customers (needs test)', 'Win-back', 'CRM', at_risk_rev * winback * b['b2c_margin'] if include_winback else 0],
-        ['Cut Influencer spend', 'Influencers', 'Marketing', b['influencer_yr'] * influencer_cut],
-        ['Stop wholesale stockouts', 'Stockouts', 'Supply chain', b['lost_sales'] * b['wh_margin']],
-        ['Cut size/fit returns (App 8)', 'Size returns', 'Online', b['size_refunds'] * size_cut * b['b2c_margin']],
+        [t('Cap wholesale discount', 'وضع سقف لخصم الجملة'), t('Discount cap', 'سقف الخصم'), t('Sales', 'المبيعات'), cap_gain],
+        [t('Release excess stock', 'تصريف المخزون الزائد'), t('Excess stock', 'المخزون الزائد'), t('Supply chain', 'سلسلة الإمداد'), excess * holding],
+        [t('Reduce cost of poor quality', 'خفض تكلفة الجودة الرديئة'), t('Quality', 'الجودة'), t('Factory', 'المصنع'), b['copq_yr'] * copq_cut],
+        [t('Win back at-risk customers (needs test)', 'استعادة العملاء المعرّضين للخسارة (يحتاج تجربة)'), t('Win-back', 'الاستعادة'), 'CRM',
+         at_risk_rev * winback * b['b2c_margin'] if include_winback else 0],
+        [t('Cut Influencer spend', 'خفض إنفاق المؤثرين'), t('Influencers', 'المؤثرون'), t('Marketing', 'التسويق'), b['influencer_yr'] * influencer_cut],
+        [t('Stop wholesale stockouts', 'منع نفاد مخزون الجملة'), t('Stockouts', 'النفاد'), t('Supply chain', 'سلسلة الإمداد'), b['lost_sales'] * b['wh_margin']],
+        [t('Cut size/fit returns (App 8)', 'خفض مرتجعات المقاس (التطبيق 8)'), t('Size returns', 'مرتجعات المقاس'), t('Online', 'أونلاين'),
+         b['size_refunds'] * size_cut * b['b2c_margin']],
     ]
     plan = pd.DataFrame(rows, columns=['action', 'short', 'owner', 'profit_M'])
     plan = plan[plan['profit_M'] > 0].sort_values('profit_M', ascending=False).reset_index(drop=True)
@@ -481,24 +533,27 @@ def recommend_size(audience, height=None, weight=None, age=None, fit='Regular'):
         ch = KIDS_CHART
         by_height = ch[(height >= ch['height_min']) & (height < ch['height_max'])]
         i = by_height.index[0] if len(by_height) else (0 if height < ch['height_min'].min() else len(ch) - 1)
-        reason = f'Height {height} cm fits size {ch.loc[i, "size"]} ({ch.loc[i, "height_min"]}-{ch.loc[i, "height_max"]} cm).'
+        reason = t(f'Height {height} cm fits size {ch.loc[i, "size"]} ({ch.loc[i, "height_min"]}-{ch.loc[i, "height_max"]} cm).',
+                   f'الطول {height} سم يناسب مقاس {ch.loc[i, "size"]} ({ch.loc[i, "height_min"]}-{ch.loc[i, "height_max"]} سم).')
         if weight is not None and weight > ch.loc[i, 'weight_max'] and i < len(ch) - 1:
             i += 1
-            reason += f' Weight {weight} kg is above that size, so we go one size up.'
+            reason += t(f' Weight {weight} kg is above that size, so we go one size up.',
+                        f' الوزن {weight} كجم أعلى من هذا المقاس، لذلك نرشّح مقاسًا أكبر.')
         if fit == 'Loose' and i < len(ch) - 1:
             i += 1
-            reason += ' Loose fit preferred: one size up.'
+            reason += t(' Loose fit preferred: one size up.', ' تفضيل القَصّة الواسعة: مقاس أكبر.')
         return ch.loc[i, 'size'], reason
     ch = WOMEN_CHART
     i = ch[(weight >= ch['weight_min']) & (weight < ch['weight_max'])].index[0]
-    reason = f'Weight {weight} kg fits size {ch.loc[i, "size"]} (bust {ch.loc[i, "bust_cm"]} cm).'
+    reason = t(f'Weight {weight} kg fits size {ch.loc[i, "size"]} (bust {ch.loc[i, "bust_cm"]} cm).',
+               f'الوزن {weight} كجم يناسب مقاس {ch.loc[i, "size"]} (محيط الصدر {ch.loc[i, "bust_cm"]} سم).')
     if height is not None and height >= 172 and i < len(ch) - 1:
         i += 1
-        reason += ' Tall height: one size up for length.'
+        reason += t(' Tall height: one size up for length.', ' الطول كبير: مقاس أكبر من أجل الطول.')
     if fit == 'Loose' and i < len(ch) - 1:
         i += 1
-        reason += ' Loose fit preferred: one size up.'
+        reason += t(' Loose fit preferred: one size up.', ' تفضيل القَصّة الواسعة: مقاس أكبر.')
     if fit == 'Snug' and i > 0:
         i -= 1
-        reason += ' Snug fit preferred: one size down.'
+        reason += t(' Snug fit preferred: one size down.', ' تفضيل القَصّة الضيقة: مقاس أصغر.')
     return ch.loc[i, 'size'], reason
