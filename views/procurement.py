@@ -39,7 +39,7 @@ g = g.sort_values('risk', ascending=True)
 l, r = st.columns([3, 2])
 with l:
     fig = go.Figure(go.Bar(y=g['Supplier_ID'] + ' · ' + g['Primary_Category'].map(cn), x=g['risk'], orientation='h',
-                           marker_color=[u.RED if v >= 60 else (u.ORANGE if v >= 40 else u.LIGHT_BLUE) for v in g['risk']],
+                           marker_color=[u.ORANGE if v >= 60 else (u.GREY if v >= 40 else u.LIGHT_BLUE) for v in g['risk']],
                            text=[f'{v:.0f}' for v in g['risk']], textposition='outside'))
     fig.update_xaxes(title=t('Risk score (0 = safest, 100 = riskiest)', 'درجة الخطر (0 = الأكثر أمانًا، 100 = الأخطر)'), range=[0, 110])
     s1, s2 = g.iloc[-1]['Supplier_ID'], g.iloc[-2]['Supplier_ID']
@@ -62,8 +62,8 @@ with l:
     late = (1 - y) * 100
     others = late.drop(columns=['SUP04', 'SUP09']).mean(axis=1)
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=late.index, y=late['SUP09'], name='SUP09', mode='lines+markers', line=dict(color=u.RED, width=3)))
-    fig.add_trace(go.Scatter(x=late.index, y=late['SUP04'], name=t('SUP04 (contracted)', 'SUP04 (متعاقد)'), mode='lines+markers', line=dict(color=u.ORANGE, width=3)))
+    fig.add_trace(go.Scatter(x=late.index, y=late['SUP09'], name='SUP09', mode='lines+markers', line=dict(color=u.ORANGE, width=3)))
+    fig.add_trace(go.Scatter(x=late.index, y=late['SUP04'], name=t('SUP04 (contracted)', 'SUP04 (متعاقد)'), mode='lines+markers', line=dict(color=u.ORANGE, width=3, dash='dash')))
     fig.add_trace(go.Scatter(x=late.index, y=others, name=t('Other 10 suppliers (avg)', 'بقية الموردين الـ 10 (متوسط)'), mode='lines+markers',
                              line=dict(color=u.GREY, width=2, dash='dot')))
     fig.update_xaxes(dtick=1)
@@ -75,7 +75,9 @@ with r:
     cost = po.groupby(['FY', 'Category'])['Unit_Cost_EGP'].mean().unstack()
     idx = cost / cost.iloc[0] * 100
     fig = go.Figure()
-    palette = [u.ORANGE, u.BLUE, u.AQUA, u.GREY, u.LIGHT_BLUE]
+    top = (idx.iloc[-1]).idxmax()  # the category that rose the most gets the highlight
+    others = iter([u.BLUE, u.LIGHT_BLUE, u.GREY, u.SOFT_GREY])
+    palette = [u.ORANGE if col == top else next(others) for col in idx.columns]
     for col, colr in zip(idx.columns, palette):
         fig.add_trace(go.Scatter(x=idx.index, y=idx[col], name=f'{cn(col)} ({idx[col].iloc[-1] - 100:+.1f}%)', mode='lines+markers', line=dict(color=colr, width=2.5)))
     fig.update_yaxes(title=t('Unit cost index (FY2024 = 100)', 'مؤشر تكلفة الوحدة (FY2024 = 100)'))

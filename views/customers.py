@@ -96,7 +96,7 @@ with tab2:
         omni = pd.DataFrame({'group': used}).join(spend.rename('spend')).groupby('group').agg(customers=('spend', 'size'), spend=('spend', 'mean'))
         omni = omni.reindex(['Store only', 'Online only', 'Both'])
         omni_lbl = {'Store only': t('Store only', 'المتجر فقط'), 'Online only': t('Online only', 'الأونلاين فقط'), 'Both': t('Both', 'الاثنان')}
-        fig = go.Figure(go.Bar(x=[omni_lbl[i] for i in omni.index], y=omni['spend'], marker_color=[u.BLUE, u.ORANGE, u.AQUA],
+        fig = go.Figure(go.Bar(x=[omni_lbl[i] for i in omni.index], y=omni['spend'], marker_color=[u.LIGHT_BLUE, u.LIGHT_BLUE, u.ORANGE],
                                text=[t(f'{v:,.0f} EGP<br>{n:,} customers', f'{v:,.0f} جنيه<br>{n:,} عميل') for v, n in zip(omni['spend'], omni['customers'])],
                                textposition='outside'))
         fig.update_yaxes(title=t('Average spend per customer (3 years)', 'متوسط إنفاق العميل (3 سنوات)'), range=[0, omni['spend'].max() * 1.3])

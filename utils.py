@@ -14,7 +14,9 @@ import plotly.graph_objects as go
 # ---------------------------------------------------------------- colors
 BLUE, ORANGE, AQUA, INK = '#2a78d6', '#eb6834', '#1baf7a', '#52514e'
 LIGHT_BLUE, GREY, RED = '#b9d3f2', '#9b9a96', '#d03b3b'
-CHANNEL_COLORS = {'Online': ORANGE, 'Retail': BLUE, 'Store': BLUE, 'Wholesale': AQUA}
+SOFT_GREY = '#d3d2ce'
+# Simple rule: blue = main, grey = context, orange = the ONE thing each chart wants you to look at
+CHANNEL_COLORS = {'Online': BLUE, 'Retail': LIGHT_BLUE, 'Store': LIGHT_BLUE, 'Wholesale': GREY}
 LOC = {'LOC001': 'Store', 'LOC002': 'Online', 'LOC003': 'Wholesale'}
 
 

@@ -49,7 +49,7 @@ with left:
     fig.add_trace(go.Scatter(x=m['Month'], y=m['net_sales'] / 1e6, name=t('Net sales', 'صافي المبيعات'), mode='lines',
                              line=dict(color=u.BLUE, width=2.5)))
     fig.add_trace(go.Scatter(x=m['Month'], y=m['gross_profit'] / 1e6, name=t('Gross profit', 'إجمالي الربح'), mode='lines',
-                             line=dict(color=u.AQUA, width=2.5)))
+                             line=dict(color=u.ORANGE, width=2.5)))
     fig.update_yaxes(title=t('EGP millions per month', 'مليون جنيه شهريًا'))
     u.show(u.style(fig, t('Sales peak every December — profit stays a thin slice of it',
                           'المبيعات تبلغ ذروتها كل ديسمبر — والربح يبقى شريحة رفيعة منها'), legend=True))
@@ -139,7 +139,7 @@ fig = go.Figure(go.Waterfall(
     measure=['absolute'] + ['relative'] * len(plan) + ['total'],
     text=[f'{base:.1f}M'] + [f'+{v:.1f}' for v in plan['profit_M']] + [f'{base + total:.1f}M'],
     textposition='outside',
-    increasing=dict(marker=dict(color=u.AQUA)), totals=dict(marker=dict(color=u.BLUE)),
+    increasing=dict(marker=dict(color=u.LIGHT_BLUE)), totals=dict(marker=dict(color=u.BLUE)),
     connector=dict(line=dict(color='#d6d5d0'))))
 fig.update_yaxes(title=t('Gross profit, EGP millions / year', 'إجمالي الربح، مليون جنيه / سنة'), range=[0, (base + total) * 1.15])
 u.show(u.style(fig, t(f'{len(plan)} actions could lift gross profit by ~{total:.1f}M EGP a year (+{total / base:.0%})',

@@ -104,7 +104,7 @@ with tab2:
         share = b2c.groupby('FY')['Channel'].apply(lambda x: (x == 'Online').mean() * 100)
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=tr.index, y=tr['Online'], name=u.ch_name('Online'), mode='lines+markers', line=dict(color=u.ORANGE, width=3)))
-        fig.add_trace(go.Scatter(x=tr.index, y=tr['Retail'], name=u.ch_name('Retail'), mode='lines+markers', line=dict(color=u.BLUE, width=3)))
+        fig.add_trace(go.Scatter(x=tr.index, y=tr['Retail'], name=u.ch_name('Retail'), mode='lines+markers', line=dict(color=u.GREY, width=3)))
         fig.update_yaxes(title=t('Lines returned for size / fit, %', 'البنود المرتجعة بسبب المقاس، %'), range=[0, 3.5])
         u.show(u.style(fig, t(f'Online returns 2x more for size — and online is now {share.iloc[-1]:.0f}% of B2C',
                               f'الأونلاين يرتجع بسبب المقاس ضعف المتجر — والأونلاين الآن {share.iloc[-1]:.0f}% من التجزئة'), legend=True))

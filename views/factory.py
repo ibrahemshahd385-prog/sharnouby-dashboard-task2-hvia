@@ -82,7 +82,7 @@ with tab2:
     u.kpi(k[0], t('On time today', 'في الموعد اليوم'), f'{now:.1%}')
     u.kpi(k[1], t('On time after fixes', 'في الموعد بعد الإصلاح'), f'{new:.1%}', f"{(new - now) * 100:+.1f} {t('pts', 'نقطة')}")
     u.kpi(k[2], t('Late orders avoided', 'طلبات متأخرة تم تجنّبها'), f'{fixed:.0f}')
-    fig = go.Figure(go.Bar(x=[t('Today', 'اليوم'), t('After fixes', 'بعد الإصلاح')], y=[now * 100, new * 100], marker_color=[u.GREY, u.AQUA],
+    fig = go.Figure(go.Bar(x=[t('Today', 'اليوم'), t('After fixes', 'بعد الإصلاح')], y=[now * 100, new * 100], marker_color=[u.GREY, u.BLUE],
                            text=[f'{now:.1%}', f'{new:.1%}'], textposition='outside'))
     fig.update_yaxes(title=t('% of orders on time', 'نسبة الطلبات في الموعد'), range=[0, 105])
     u.show(u.style(fig, t('Fixing half the sewing & finishing delays → ~89% on time', 'إصلاح نصف تأخير الخياطة والتشطيب ← ~89% في الموعد'), height=340))
@@ -97,7 +97,7 @@ with tab3:
     l, r = st.columns(2)
     with l:
         fig = go.Figure()
-        palette = [u.BLUE, u.ORANGE, u.AQUA, u.GREY]
+        palette = [u.BLUE, u.LIGHT_BLUE, u.GREY, u.SOFT_GREY]
         for col, colr in zip(copq.columns[:-1], palette):
             fig.add_trace(go.Bar(x=copq.index, y=copq[col], name=nm(col), marker_color=colr))
         fig.update_layout(barmode='stack')

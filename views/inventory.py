@@ -48,7 +48,7 @@ with tab1:
     with r:
         fig = go.Figure()
         for loc in ['Store', 'Online', 'Wholesale']:
-            fig.add_trace(go.Bar(x=so.index, y=so[loc], name=u.ch_name(loc), marker_color=u.CHANNEL_COLORS[loc]))
+            fig.add_trace(go.Bar(x=so.index, y=so[loc], name=u.ch_name(loc), marker_color=u.ORANGE if loc == 'Wholesale' else u.CHANNEL_COLORS[loc]))
         fig.update_layout(barmode='group')
         fig.update_yaxes(title=t('Stockout days (all products)', 'أيام النفاد (كل المنتجات)'))
         u.show(u.style(fig, t('Wholesale stockouts almost quadrupled in two years', 'نفاد مخزون الجملة تضاعف نحو 4 مرات في عامين'), legend=True))

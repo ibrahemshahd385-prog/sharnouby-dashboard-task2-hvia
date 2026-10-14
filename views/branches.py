@@ -88,7 +88,7 @@ l, r = st.columns(2)
 with l:
     rr = ch.groupby('Channel')[['returns', 'lines']].sum()
     rr['rate'] = rr['returns'] / rr['lines'] * 100
-    fig = go.Figure(go.Bar(x=[u.ch_name(i) for i in rr.index], y=rr['rate'], marker_color=[u.CHANNEL_COLORS[i] for i in rr.index],
+    fig = go.Figure(go.Bar(x=[u.ch_name(i) for i in rr.index], y=rr['rate'], marker_color=[u.ORANGE if i == 'Online' else u.SOFT_GREY for i in rr.index],
                            text=[f'{v:.1f}%' for v in rr['rate']], textposition='outside'))
     fig.update_yaxes(title=t('% of lines returned', 'نسبة البنود المرتجعة'), range=[0, rr['rate'].max() * 1.3])
     u.show(u.style(fig, t('Online returns 2x the store (size is the #1 reason)', 'مرتجعات الأونلاين ضعف المتجر (والمقاس هو السبب الأول)')))
